@@ -454,7 +454,7 @@ MainWindow::MainWindow(PreferencesDialog * prefDialog, QWidget * parent, bool sh
 	_ui->actionRealSense_ZR300->setEnabled(CameraRealSense::available());
 	_ui->actionRealSense2_D415->setEnabled(CameraRealSense2::available());
 	_ui->actionRealSense2_D435->setEnabled(CameraRealSense2::available());
-	_ui->actionRealSense2_D435i->setEnabled(CameraRealSense2::available());
+	_ui->actionRealSense2_D435i->setEnabled(CameraRealSense2i::available());
 	_ui->actionStereoDC1394->setEnabled(CameraStereoDC1394::available());
 	_ui->actionStereoFlyCapture2->setEnabled(CameraStereoFlyCapture2::available());
 	_ui->actionStereoZed->setEnabled(CameraStereoZed::available());

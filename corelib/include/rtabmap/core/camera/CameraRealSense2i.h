@@ -27,14 +27,70 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include <rtabmap/core/camera/CameraFreenect.h>
-#include <rtabmap/core/camera/CameraFreenect2.h>
-#include <rtabmap/core/camera/CameraK4W2.h>
-#include <rtabmap/core/camera/CameraOpenni.h>
-#include <rtabmap/core/camera/CameraOpenNI2.h>
-#include <rtabmap/core/camera/CameraOpenNICV.h>
-#include <rtabmap/core/camera/CameraRealSense.h>
-#include <rtabmap/core/camera/CameraRealSense2.h>
-#include <rtabmap/core/camera/CameraRealSense2i.h>
-#include <rtabmap/core/camera/CameraRGBDImages.h>
+#include "rtabmap/core/RtabmapExp.h" // DLL export/import defines
 
+#include "rtabmap/core/CameraModel.h"
+#include "rtabmap/core/Camera.h"
+#include "rtabmap/core/Version.h"
+
+#include <pcl/pcl_config.h>
+
+
+namespace rs2
+{
+	class context;
+	class device;
+	class syncer;
+}
+struct rs2_intrinsics;
+struct rs2_extrinsics;
+
+namespace rtabmap
+{
+
+class RTABMAP_EXP CameraRealSense2i :
+	public Camera
+{
+public:
+	static bool available();
+
+public:
+	// default local transform z in, x right, y down));
+	CameraRealSense2i(
+		const std::string & deviceId = "",
+		float imageRate = 0,
+		const Transform & localTransform = Transform::getIdentity());
+	virtual ~CameraRealSense2i();
+
+	virtual bool init(const std::string & calibrationFolder = ".", const std::string & cameraName = "");
+	virtual bool isCalibrated() const;
+	virtual std::string getSerial() const;
+
+	// parameters are set during initialization
+	void setEmitterEnabled(bool enabled);
+	void setIRDepthFormat(bool enabled);
+
+protected:
+	virtual SensorData captureImage(CameraInfo * info = 0);
+
+private:
+#ifdef RTABMAP_REALSENSE2
+	rs2::context * ctx_;
+	rs2::device * dev_;
+	std::string deviceId_;
+	rs2::syncer * syncer_;
+	float depth_scale_meters_;
+	rs2_intrinsics * depthIntrinsics_;
+	rs2_intrinsics * rgbIntrinsics_;
+	rs2_extrinsics * depthToRGBExtrinsics_;
+	cv::Mat depthBuffer_;
+	cv::Mat rgbBuffer_;
+	CameraModel model_;
+
+	bool emitterEnabled_;
+	bool irDepth_;
+#endif
+};
+
+
+} // namespace rtabmap

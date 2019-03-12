@@ -24,7 +24,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <rtabmap/core/camera/CameraRealSense2.h>
+#include <rtabmap/core/camera/CameraRealSense2i.h>
 #include <rtabmap/utilite/UTimer.h>
 #include <rtabmap/utilite/UThreadC.h>
 #include <rtabmap/utilite/UConversion.h>
@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace rtabmap
 {
 
-bool CameraRealSense2::available()
+bool CameraRealSense2i::available()
 {
 #ifdef RTABMAP_REALSENSE2
 	return true;
@@ -49,7 +49,7 @@ bool CameraRealSense2::available()
 #endif
 }
 
-CameraRealSense2::CameraRealSense2(
+CameraRealSense2i::CameraRealSense2i(
 		const std::string & device,
 		float imageRate,
 		const rtabmap::Transform & localTransform) :
@@ -71,7 +71,7 @@ CameraRealSense2::CameraRealSense2(
 	UDEBUG("");
 }
 
-CameraRealSense2::~CameraRealSense2()
+CameraRealSense2i::~CameraRealSense2i()
 {
 #ifdef RTABMAP_REALSENSE2
 	delete ctx_;
@@ -156,7 +156,7 @@ void alignFrame(const rs2_intrinsics& from_intrin,
 }
 #endif
 
-bool CameraRealSense2::init(const std::string & calibrationFolder, const std::string & cameraName)
+bool CameraRealSense2i::init(const std::string & calibrationFolder, const std::string & cameraName)
 {
 	UDEBUG("");
 #ifdef RTABMAP_REALSENSE2
@@ -330,17 +330,17 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 	return true;
 
 #else
-	UERROR("CameraRealSense: RTAB-Map is not built with RealSense2 support!");
+	UERROR("CameraRealSensei: RTAB-Map is not built with RealSense2i support!");
 	return false;
 #endif
 }
 
-bool CameraRealSense2::isCalibrated() const
+bool CameraRealSense2i::isCalibrated() const
 {
 	return true;
 }
 
-std::string CameraRealSense2::getSerial() const
+std::string CameraRealSense2i::getSerial() const
 {
 #ifdef RTABMAP_REALSENSE2
 	return dev_->get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
@@ -348,21 +348,21 @@ std::string CameraRealSense2::getSerial() const
 	return "NA";
 }
 
-void CameraRealSense2::setEmitterEnabled(bool enabled)
+void CameraRealSense2i::setEmitterEnabled(bool enabled)
 {
 #ifdef RTABMAP_REALSENSE2
 	emitterEnabled_ = enabled;
 #endif
 }
 
-void CameraRealSense2::setIRDepthFormat(bool enabled)
+void CameraRealSense2i::setIRDepthFormat(bool enabled)
 {
 #ifdef RTABMAP_REALSENSE2
 	irDepth_ = enabled;
 #endif
 }
 
-SensorData CameraRealSense2::captureImage(CameraInfo * info)
+SensorData CameraRealSense2i::captureImage(CameraInfo * info)
 {
 	SensorData data;
 #ifdef RTABMAP_REALSENSE2
@@ -443,7 +443,7 @@ SensorData CameraRealSense2::captureImage(CameraInfo * info)
 		UERROR("An error has occurred during frame callback: %s", ex.what());
 	}
 #else
-	UERROR("CameraRealSense2: RTAB-Map is not built with RealSense2 support!");
+	UERROR("CameraRealSense2i: RTAB-Map is not built with RealSense2 support!");
 #endif
 	return data;
 }
