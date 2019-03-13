@@ -85,7 +85,9 @@ CameraRealSense2i::~CameraRealSense2i()
 }
 
 #ifdef RTABMAP_REALSENSE2
-void alignFrame(const rs2_intrinsics& from_intrin,
+
+// FIXME Raw rename from CameraRealSense2.cpp/alignFrame to avoid conflict. This should be reworked.
+void alignFrameI(const rs2_intrinsics& from_intrin,
                                    const rs2_intrinsics& other_intrin,
                                    rs2::frame from_image,
                                    uint32_t output_image_bytes_per_pixel,
@@ -410,7 +412,7 @@ SensorData CameraRealSense2i::captureImage(CameraInfo * info)
 				else
 				{
 					depth = cv::Mat(depthBuffer_.size(), depthBuffer_.type());
-					alignFrame(*depthIntrinsics_, *rgbIntrinsics_,
+					alignFrameI(*depthIntrinsics_, *rgbIntrinsics_,
 							depth_frame, from_image_frame.get_bytes_per_pixel(),
 							*depthToRGBExtrinsics_, depth, depth_scale_meters_);
 				}

@@ -26,6 +26,7 @@ SET(SRC_FILES
     camera/CameraOpenNICV.cpp
     camera/CameraRealSense.cpp
     camera/CameraRealSense2.cpp
+    camera/CameraRealSense2i.cpp
     camera/CameraRGBDImages.cpp
     camera/CameraStereoDC1394.cpp
     camera/CameraStereoFlyCapture2.cpp
