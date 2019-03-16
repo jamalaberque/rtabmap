@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "rtabmap/core/Version.h"
 
 #include <pcl/pcl_config.h>
+#include <librealsense2/hpp/rs_pipeline.hpp>
 
 
 namespace rs2
@@ -86,9 +87,11 @@ private:
 	cv::Mat depthBuffer_;
 	cv::Mat rgbBuffer_;
 	CameraModel model_;
+	rs2::pipeline * imuPipe_;
 
 	bool emitterEnabled_;
 	bool irDepth_;
+	bool imuModule_;
 #endif
 };
 

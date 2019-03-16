@@ -65,7 +65,9 @@ CameraRealSense2::CameraRealSense2(
 	rgbIntrinsics_(new rs2_intrinsics),
 	depthToRGBExtrinsics_(new rs2_extrinsics),
 	emitterEnabled_(true),
-	irDepth_(false)
+	imuPipe_(new rs2::pipeline),
+	irDepth_(false),
+	imuModule_(false)
 #endif
 {
 	UDEBUG("");
@@ -80,6 +82,7 @@ CameraRealSense2::~CameraRealSense2()
 	delete depthIntrinsics_;
 	delete rgbIntrinsics_;
 	delete depthToRGBExtrinsics_;
+	delete imuPipe_;
 #endif
 	UDEBUG("");
 }
@@ -246,6 +249,7 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 		}
 		else if ("Motion Module" == module_name)
 		{
+		    imuModule_ = true;
 		}
 		else
 		{
@@ -326,6 +330,13 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 
 	uSleep(1000); // ignore the first frames
 	UINFO("Enabling streams...done!");
+
+	rs2::config cfg;
+	cfg.enable_stream(RS2_STREAM_GYRO);
+	cfg.enable_stream(RS2_STREAM_ACCEL);
+
+	imuPipe_->start(cfg);
+	UINFO("Enabling IMU streams...done!");
 
 	return true;
 
@@ -436,6 +447,36 @@ SensorData CameraRealSense2::captureImage(CameraInfo * info)
 		else
 		{
 			UERROR("Missing frames (received %d)", (int)frameset.size());
+		}
+
+		if(imuModule_)
+		{
+			rs2::frameset imuFrameSet = imuPipe_->wait_for_frames();
+			bool is_accel_arrived = false;
+			bool is_gyro_arrived = false;
+			rs2_vector accel_sample;
+			rs2_vector gyro_sample;
+
+			if (rs2::motion_frame accel_frame = imuFrameSet.first_or_default(RS2_STREAM_ACCEL))
+			{
+				accel_sample = accel_frame.get_motion_data();
+				is_accel_arrived = true;
+			}
+
+			if (rs2::motion_frame gyro_frame = imuFrameSet.first_or_default(RS2_STREAM_GYRO))
+			{
+				gyro_sample = gyro_frame.get_motion_data(); // x y z = Yaw Pitch Roll
+				is_gyro_arrived = true;
+			}
+
+			if(is_accel_arrived && is_gyro_arrived)
+			{
+				// TODO Proper variance and covariance ?
+				cv::Vec3d gyr(gyro_sample.x, gyro_sample.y, gyro_sample.z);
+				cv::Vec3d acc(accel_sample.x, accel_sample.y, accel_sample.z);
+				IMU imu(gyr, cv::Mat(), acc, cv::Mat(), this->getLocalTransform());
+				data.setIMU(imu);
+			}
 		}
 	}
 	catch(const std::exception& ex)
