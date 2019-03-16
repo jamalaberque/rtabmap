@@ -64,8 +64,9 @@ CameraRealSense2::CameraRealSense2(
 	depthIntrinsics_(new rs2_intrinsics),
 	rgbIntrinsics_(new rs2_intrinsics),
 	depthToRGBExtrinsics_(new rs2_extrinsics),
-	emitterEnabled_(true),
 	imuPipe_(new rs2::pipeline),
+
+	emitterEnabled_(true),
 	irDepth_(false),
 	imuModule_(false)
 #endif
@@ -328,7 +329,6 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 		 }
 	 }
 
-	uSleep(1000); // ignore the first frames
 	UINFO("Enabling streams...done!");
 
 	rs2::config cfg;
@@ -338,6 +338,7 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 	imuPipe_->start(cfg);
 	UINFO("Enabling IMU streams...done!");
 
+	uSleep(1000); // ignore the first frames
 	return true;
 
 #else
