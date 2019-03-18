@@ -226,6 +226,7 @@
       <addaction name="menuRealSense_ZR300"/>
       <addaction name="menuRealSense_D415"/>
       <addaction name="menuRealSense_D435"/>
+      <addaction name="menuRealSense_D435i"/>
      </widget>
      <widget class="QMenu" name="menuStereo_camera">
       <property name="title">
