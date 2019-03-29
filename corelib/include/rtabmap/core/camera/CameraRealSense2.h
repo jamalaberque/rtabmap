@@ -91,7 +91,8 @@ private:
 
 	bool emitterEnabled_;
 	bool irDepth_;
-	bool imuModule_;
+	bool motionModule_;
+    bool trackingModule_;
 #endif
 };
 

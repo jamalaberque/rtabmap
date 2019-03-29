@@ -68,7 +68,7 @@ CameraRealSense2::CameraRealSense2(
 
 	emitterEnabled_(true),
 	irDepth_(false),
-	imuModule_(false)
+	motionModule_(false)
 #endif
 {
 	UDEBUG("");
@@ -250,7 +250,11 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 		}
 		else if ("Motion Module" == module_name)
 		{
-		    imuModule_ = true;
+			motionModule_ = true;
+		}
+		else if ("Tracking Module" == module_name)
+		{
+		    trackingModule_ = true;
 		}
 		else
 		{
@@ -334,6 +338,7 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 	rs2::config cfg;
 	cfg.enable_stream(RS2_STREAM_GYRO);
 	cfg.enable_stream(RS2_STREAM_ACCEL);
+	cfg.enable_stream(RS2_STREAM_POSE);
 
 	imuPipe_->start(cfg);
 	UINFO("Enabling IMU streams...done!");
@@ -372,6 +377,12 @@ void CameraRealSense2::setIRDepthFormat(bool enabled)
 #ifdef RTABMAP_REALSENSE2
 	irDepth_ = enabled;
 #endif
+}
+
+Transform rs2PoseToTransform(const rs2_pose & pose)
+{
+    return Transform(pose.translation.x, pose.translation.y, pose.translation.z,
+    		pose.rotation.x, pose.rotation.y, pose.rotation.z, pose.rotation.w);
 }
 
 SensorData CameraRealSense2::captureImage(CameraInfo * info)
@@ -450,7 +461,7 @@ SensorData CameraRealSense2::captureImage(CameraInfo * info)
 			UERROR("Missing frames (received %d)", (int)frameset.size());
 		}
 
-		if(imuModule_)
+		if(motionModule_)
 		{
 			rs2::frameset imuFrameSet = imuPipe_->wait_for_frames();
 			bool is_accel_arrived = false;
@@ -477,6 +488,21 @@ SensorData CameraRealSense2::captureImage(CameraInfo * info)
 				cv::Vec3d acc(accel_sample.x, accel_sample.y, accel_sample.z);
 				IMU imu(gyr, cv::Mat(), acc, cv::Mat(), this->getLocalTransform());
 				data.setIMU(imu);
+			}
+		}
+
+		if(trackingModule_)
+		{
+			rs2::frameset imuFrameSet = imuPipe_->wait_for_frames();
+
+			if (rs2::pose_frame pose_frame = imuFrameSet.first_or_default(RS2_STREAM_POSE))
+			{
+				rs2_pose pose= pose_frame.get_pose_data();
+				// TODO Check tracking accuracy ?
+				Transform opticalRotation(0,0,1,0, -1,0,0,0, 0,-1,0,0);
+				info->odomPose = opticalRotation * rs2PoseToTransform(pose) * opticalRotation.inverse();
+				info->odomCovariance = cv::Mat::eye(6, 6, CV_64FC1) * 0.0005;
+				info->odomVelocity = {pose.velocity.x, pose.velocity.y, pose.velocity.z};
 			}
 		}
 	}
