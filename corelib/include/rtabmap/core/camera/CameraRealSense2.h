@@ -34,14 +34,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "rtabmap/core/Version.h"
 
 #include <pcl/pcl_config.h>
-#include <librealsense2/hpp/rs_pipeline.hpp>
-
 
 namespace rs2
 {
 	class context;
 	class device;
 	class syncer;
+	class pipeline;
 }
 struct rs2_intrinsics;
 struct rs2_extrinsics;

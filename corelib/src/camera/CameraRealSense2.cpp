@@ -167,7 +167,7 @@ bool CameraRealSense2::init(const std::string & calibrationFolder, const std::st
 
 	UINFO("setupDevice...");
 
-	auto list = ctx_->query_devices();
+    auto list = ctx_->query_devices();
 	if (0 == list.size())
 	{
 		UERROR("No RealSense2 devices were found!");
@@ -379,11 +379,13 @@ void CameraRealSense2::setIRDepthFormat(bool enabled)
 #endif
 }
 
+#ifdef RTABMAP_REALSENSE2
 Transform rs2PoseToTransform(const rs2_pose & pose)
 {
     return Transform(pose.translation.x, pose.translation.y, pose.translation.z,
     		pose.rotation.x, pose.rotation.y, pose.rotation.z, pose.rotation.w);
 }
+#endif
 
 SensorData CameraRealSense2::captureImage(CameraInfo * info)
 {
@@ -498,7 +500,8 @@ SensorData CameraRealSense2::captureImage(CameraInfo * info)
 			if (rs2::pose_frame pose_frame = imuFrameSet.first_or_default(RS2_STREAM_POSE))
 			{
 				rs2_pose pose= pose_frame.get_pose_data();
-				// TODO Check tracking accuracy ?
+				// TODO Check tracking accuracy ? Perhaps expose it as parameter ?
+				// TODO Check rotation
 				Transform opticalRotation(0,0,1,0, -1,0,0,0, 0,-1,0,0);
 				info->odomPose = opticalRotation * rs2PoseToTransform(pose) * opticalRotation.inverse();
 				info->odomCovariance = cv::Mat::eye(6, 6, CV_64FC1) * 0.0005;
