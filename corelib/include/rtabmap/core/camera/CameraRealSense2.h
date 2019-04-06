@@ -42,6 +42,7 @@ namespace rs2
 	class context;
 	class device;
 	class syncer;
+	class pipeline;
 }
 struct rs2_intrinsics;
 struct rs2_extrinsics;
